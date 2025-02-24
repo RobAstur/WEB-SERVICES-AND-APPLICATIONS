@@ -9,5 +9,3 @@ def getALL():
 if __name__ == "__main__":
     with open ("cso.json", "wt") as fp:
         print(json.dumps(getALL()), file = fp)
-
-        
