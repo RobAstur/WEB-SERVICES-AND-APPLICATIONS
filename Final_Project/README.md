@@ -18,7 +18,7 @@ This project focuses on managing supplier information. It allows users to create
 
 1)  Supplier DAO - Contains the code for connecting to the database and performing CRUD operations on supplier data.
 2)  Rest Server - A Python-based server built with Flask that manages the connection between the database and the website, mapping data between them.
-3)  Database configuration - Stores the settings needed to connect to the SQL database.
+3)  Database configuration - Stores the settings needed to connect to the SQL database (added to .gitignore)
 4)  Supplier interface(HTML, CSS for style) - The frontend part of the application that sends AJAX requests to the REST server and displays supplier data.
 5)  Supplier DAO Skeleton- A simplified version of the DAO used for testing the REST API during development.
 6)  SQL database creation script. 
