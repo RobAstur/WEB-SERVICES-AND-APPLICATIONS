@@ -2,10 +2,10 @@ import mysql.connector
 
 # Establish connection to MySQL and use the existing 'suppliers' database
 db = mysql.connector.connect(
-  host="localhost",        # MySQL server is hosted on localhost
-  user="root",             # MySQL username
-  password="root",             # MySQL password (empty in this case)
-  database="suppliers"     # Connect to the existing 'suppliers' database
+  host="localhost",        
+  user="your user",             
+  password="ryour password",             
+  database="suppliers"     
 )
 
 cursor = db.cursor()
