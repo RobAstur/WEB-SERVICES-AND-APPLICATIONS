@@ -14,13 +14,14 @@
 
 The goal of this repository is to apply and demonstrate knowledge of web services and applications by building a web application using Python, AJAX, and SQL.
 
-This project focuses on managing supplier information. It allows users to create, read, update, and delete (CRUD) supplier records through a web interface connected to a backend server and database. There are 6 different files each of them have their own function.
+This project focuses on managing supplier information. It allows users to create, read, update, and delete (CRUD) supplier records through a web interface connected to a backend server and database. There are 7 different files each of them have their own function.
 
 1)  Supplier DAO - Contains the code for connecting to the database and performing CRUD operations on supplier data.
 2)  Rest Server - A Python-based server built with Flask that manages the connection between the database and the website, mapping data between them.
 3)  Database configuration - Stores the settings needed to connect to the SQL database.
 4)  Supplier interface(HTML, CSS for style) - The frontend part of the application that sends AJAX requests to the REST server and displays supplier data.
 5)  Supplier DAO Skeleton- A simplified version of the DAO used for testing the REST API during development.
+6)  SQL database creation script. 
 6)  SQL table script - Instructions or script to create the supplier table in the database.
 
 
