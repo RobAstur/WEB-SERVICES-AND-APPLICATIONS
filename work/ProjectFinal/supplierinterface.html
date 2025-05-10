@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Suppliers</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .form-container {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        #createUpdateForm input {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">Suppliers</h1>
+
+        <div>
+            <button id="showCreateButton" class="btn btn-primary mb-3" onclick="showCreate()">Create Supplier</button>
+        </div>
+
+        <div>
+            <table class="table table-striped" id="supplierTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Country</th>
+                        <th>Update</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Supplier rows will be added here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="createUpdateForm" class="form-container" style="display: none;">
+            <h2><span id="createLabel">Create a</span> <span id="updateLabel">Update</span> Supplier</h2>
+
+            <input type="hidden" name="id" />
+
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" name="name" id="name" />
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" name="email" id="email" />
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="text" class="form-control" name="phone" id="phone" />
+            </div>
+
+            <div class="form-group">
+                <label for="country">Country:</label>
+                <input type="text" class="form-control" name="country" id="country" />
+            </div>
+
+            <div class="form-group">
+                <button id="doCreateButton" class="btn btn-success" onclick="doCreate()">Create</button>
+                <button id="doUpdateButton" class="btn btn-warning" onclick="doUpdate()">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showCreate() {
+            document.getElementById('showCreateButton').style.display = "none";
+            document.getElementById('supplierTable').style.display = "none";
+            document.getElementById('createUpdateForm').style.display = "block";
+
+            document.getElementById('createLabel').style.display = "inline";
+            document.getElementById('updateLabel').style.display = "none";
+
+            document.getElementById('doCreateButton').style.display = "inline";
+            document.getElementById('doUpdateButton').style.display = "none";
+        }
+
+        function showViewAll() {
+            document.getElementById('showCreateButton').style.display = "inline";
+            document.getElementById('supplierTable').style.display = "block";
+            document.getElementById('createUpdateForm').style.display = "none";
+        }
+
+        function showUpdate(buttonElement) {
+            document.getElementById('showCreateButton').style.display = "none";
+            document.getElementById('supplierTable').style.display = "none";
+            document.getElementById('createUpdateForm').style.display = "block";
+
+            document.getElementById('createLabel').style.display = "none";
+            document.getElementById('updateLabel').style.display = "inline";
+
+            document.getElementById('doCreateButton').style.display = "none";
+            document.getElementById('doUpdateButton').style.display = "inline";
+
+            var rowElement = buttonElement.parentNode.parentNode;
+            var supplier = getSupplierFromRow(rowElement);
+            populateFormWithSupplier(supplier);
+        }
+
+        function doCreate() {
+            var form = document.getElementById('createUpdateForm');
+            var supplier = {
+                name: form.querySelector('input[name="name"]').value,
+                email: form.querySelector('input[name="email"]').value,
+                phone: form.querySelector('input[name="phone"]').value,
+                country: form.querySelector('input[name="country"]').value
+            };
+            createSupplierAjax(supplier);
+        }
+
+        function doUpdate() {
+            var supplier = getSupplierFromForm();
+            var rowElement = document.getElementById(supplier.id);
+            updateSupplierAjax(supplier);
+            setSupplierInRow(rowElement, supplier);
+            clearForm();
+            showViewAll();
+        }
+
+        function doDelete(r) {
+            var tableElement = document.getElementById('supplierTable');
+            var rowElement = r.parentNode.parentNode;
+            var index = rowElement.rowIndex;
+            deleteSupplierAjax(rowElement.getAttribute("id"));
+            tableElement.deleteRow(index);
+        }
+
+        function addSupplierToTable(supplier) {
+            var tableElement = document.getElementById('supplierTable').getElementsByTagName('tbody')[0];
+            var rowElement = tableElement.insertRow();
+            rowElement.setAttribute('id', supplier.id);
+            rowElement.insertCell(0).innerHTML = supplier.id;
+            rowElement.insertCell(1).innerHTML = supplier.name;
+            rowElement.insertCell(2).innerHTML = supplier.email;
+            rowElement.insertCell(3).innerHTML = supplier.phone;
+            rowElement.insertCell(4).innerHTML = supplier.country;
+            rowElement.insertCell(5).innerHTML = '<button class="btn btn-warning" onclick="showUpdate(this)">Update</button>';
+            rowElement.insertCell(6).innerHTML = '<button class="btn btn-danger" onclick="doDelete(this)">Delete</button>';
+        }
+
+        function clearForm() {
+            var form = document.getElementById('createUpdateForm');
+            form.querySelector('input[name="name"]').value = '';
+            form.querySelector('input[name="email"]').value = '';
+            form.querySelector('input[name="phone"]').value = '';
+            form.querySelector('input[name="country"]').value = '';
+        }
+
+        function getSupplierFromRow(rowElement) {
+            var supplier = {};
+            supplier.id = rowElement.getAttribute('id');
+            supplier.name = rowElement.cells[1].textContent;
+            supplier.email = rowElement.cells[2].textContent;
+            supplier.phone = rowElement.cells[3].textContent;
+            supplier.country = rowElement.cells[4].textContent;
+            return supplier;
+        }
+
+        function setSupplierInRow(rowElement, supplier) {
+            rowElement.cells[0].textContent = supplier.id;
+            rowElement.cells[1].textContent = supplier.name;
+            rowElement.cells[2].textContent = supplier.email;
+            rowElement.cells[3].textContent = supplier.phone;
+            rowElement.cells[4].textContent = supplier.country;
+        }
+
+        function populateFormWithSupplier(supplier) {
+            var form = document.getElementById('createUpdateForm');
+            form.querySelector('input[name="id"]').disabled = true;
+            form.querySelector('input[name="id"]').value = supplier.id;
+            form.querySelector('input[name="name"]').value = supplier.name;
+            form.querySelector('input[name="email"]').value = supplier.email;
+            form.querySelector('input[name="phone"]').value = supplier.phone;
+            form.querySelector('input[name="country"]').value = supplier.country;
+        }
+
+        function getSupplierFromForm() {
+            var form = document.getElementById('createUpdateForm');
+            return {
+                id: form.querySelector('input[name="id"]').value,
+                name: form.querySelector('input[name="name"]').value,
+                email: form.querySelector('input[name="email"]').value,
+                phone: form.querySelector('input[name="phone"]').value,
+                country: form.querySelector('input[name="country"]').value
+            };
+        }
+
+        function getAllAjax() {
+            $.ajax({
+                url: "/suppliers",
+                method: "GET",
+                dataType: "JSON",
+                success: function(result) {
+                    result.forEach(supplier => addSupplierToTable(supplier));
+                },
+                error: function(xhr, status, error) {
+                    console.log("error: " + status + " msg:" + error);
+                }
+            });
+        }
+
+        function createSupplierAjax(supplier) {
+            $.ajax({
+                url: "/suppliers",
+                method: "POST",
+                data: JSON.stringify(supplier),
+                dataType: "JSON",
+                contentType: "application/json; charset=utf-8",
+                success: function(result) {
+                    supplier.id = result.id;
+                    addSupplierToTable(supplier);
+                    clearForm();
+                    showViewAll();
+                },
+                error: function(xhr, status, error) {
+                    console.log("error: " + status + " msg:" + error);
+                }
+            });
+        }
+
+        function updateSupplierAjax(supplier) {
+            $.ajax({
+                url: "/suppliers/" + encodeURIComponent(supplier.id),
+                method: "PUT",
+                data: JSON.stringify(supplier),
+                dataType: "JSON",
+                contentType: "application/json; charset=utf-8",
+                success: function(result) {},
+                error: function(xhr, status, error) {
+                    console.log("error: " + status + " msg:" + error);
+                }
+            });
+        }
+
+        function deleteSupplierAjax(id) {
+            $.ajax({
+                url: "/suppliers/" + encodeURIComponent(id),
+                method: "DELETE",
+                dataType: "JSON",
+                contentType: "application/json; charset=utf-8",
+                success: function(result) {},
+                error: function(xhr, status, error) {
+                    console.log("error: " + status + " msg:" + error);
+                }
+            });
+        }
+
+        // Load suppliers when page loads
+        getAllAjax();
+    </script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>View Suppliers</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body { padding: 20px; }
+        #createUpdateForm { margin-top: 20px; }
+        .form-group { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="mb-4">Suppliers</h1>
+        <button id="showCreateButton" class="btn btn-primary mb-3" onclick="showCreate()">Create Supplier</button>
+
+        <table class="table table-bordered table-striped" id="supplierTable">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Country</th>
+                    <th>Category</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div id="createUpdateForm" style="display: none;">
+            <h3><span id="createLabel">Create</span><span id="updateLabel" style="display:none;">Update</span> Supplier</h3>
+            <input type="hidden" name="id" />
+
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" class="form-control" name="name" />
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" class="form-control" name="email" />
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="text" class="form-control" name="phone" />
+            </div>
+            <div class="form-group">
+                <label>Country</label>
+                <input type="text" class="form-control" name="country" />
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <input type="text" class="form-control" name="category" />
+            </div>
+
+            <button id="doCreateButton" class="btn btn-success" onclick="doCreate()">Create</button>
+            <button id="doUpdateButton" class="btn btn-warning" onclick="doUpdate()">Update</button>
+            <button class="btn btn-secondary" onclick="showViewAll()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = "suppliers";
+        const ID_COUNTER_KEY = "supplierIdCounter";
+
+        // Retrieve stored suppliers from localStorage
+        function getStoredSuppliers() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        }
+
+        // Save suppliers list to localStorage
+        function saveSuppliersToStorage(suppliers) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(suppliers));
+        }
+
+        // Get the next unique ID for the supplier
+        function getNextId() {
+            let id = parseInt(localStorage.getItem(ID_COUNTER_KEY)) || 1;
+            localStorage.setItem(ID_COUNTER_KEY, id + 1);
+            return id.toString();
+        }
+
+        // Show the Create Supplier form
+        function showCreate() {
+            document.getElementById('showCreateButton').style.display = "none";
+            document.getElementById('supplierTable').style.display = "none";
+            document.getElementById('createUpdateForm').style.display = "block";
+            document.getElementById('createLabel').style.display = "inline";
+            document.getElementById('updateLabel').style.display = "none";
+            document.getElementById('doCreateButton').style.display = "inline-block";
+            document.getElementById('doUpdateButton').style.display = "none";
+            clearForm();
+        }
+
+        // Show the table of suppliers
+        function showViewAll() {
+            document.getElementById('showCreateButton').style.display = "inline-block";
+            document.getElementById('supplierTable').style.display = "table";
+            document.getElementById('createUpdateForm').style.display = "none";
+        }
+
+        // Show the Update Supplier form with current supplier data
+        function showUpdate(buttonElement) {
+            const rowElement = buttonElement.closest("tr");
+            const supplier = getSupplierFromRow(rowElement);
+
+            document.getElementById('showCreateButton').style.display = "none";
+            document.getElementById('supplierTable').style.display = "none";
+            document.getElementById('createUpdateForm').style.display = "block";
+            document.getElementById('createLabel').style.display = "none";
+            document.getElementById('updateLabel').style.display = "inline";
+            document.getElementById('doCreateButton').style.display = "none";
+            document.getElementById('doUpdateButton').style.display = "inline-block";
+
+            populateFormWithSupplier(supplier);
+        }
+
+        // Handle the creation of a new supplier
+        function doCreate() {
+            const form = document.getElementById('createUpdateForm');
+            const supplier = {
+                id: getNextId(),
+                name: form.querySelector('input[name="name"]').value,
+                email: form.querySelector('input[name="email"]').value,
+                phone: form.querySelector('input[name="phone"]').value,
+                country: form.querySelector('input[name="country"]').value,
+                category: form.querySelector('input[name="category"]').value
+            };
+            const suppliers = getStoredSuppliers();
+            suppliers.push(supplier);
+            saveSuppliersToStorage(suppliers);
+            addSupplierToTable(supplier);
+            clearForm();
+            showViewAll();
+        }
+
+        // Handle the update of an existing supplier
+        function doUpdate() {
+            const supplier = getSupplierFromForm();
+            let suppliers = getStoredSuppliers();
+            const index = suppliers.findIndex(s => s.id === supplier.id);
+            if (index !== -1) {
+                suppliers[index] = supplier;
+                saveSuppliersToStorage(suppliers);
+                refreshTable();
+                clearForm();
+                showViewAll();
+            }
+        }
+
+        // Handle deletion of a supplier
+        function doDelete(button) {
+            const rowElement = button.closest("tr");
+            const id = rowElement.getAttribute("data-id");
+            let suppliers = getStoredSuppliers();
+            suppliers = suppliers.filter(s => s.id !== id);
+            saveSuppliersToStorage(suppliers);
+            refreshTable();
+        }
+
+        // Refresh the suppliers table
+        function refreshTable() {
+            const tbody = document.querySelector("#supplierTable tbody");
+            tbody.innerHTML = "";
+            getStoredSuppliers().forEach(addSupplierToTable);
+        }
+
+        // Add a new supplier to the table
+        function addSupplierToTable(supplier) {
+            const tbody = document.querySelector("#supplierTable tbody");
+            const row = tbody.insertRow();
+            row.setAttribute("data-id", supplier.id);
+            row.innerHTML = `
+                <td>${supplier.id}</td>
+                <td>${supplier.name}</td>
+                <td>${supplier.email}</td>
+                <td>${supplier.phone}</td>
+                <td>${supplier.country}</td>
+                <td>${supplier.category}</td>
+                <td><button class="btn btn-sm btn-info" onclick="showUpdate(this)">Update</button></td>
+                <td><button class="btn btn-sm btn-danger" onclick="doDelete(this)">Delete</button></td>
+            `;
+        }
+
+        // Clear the form inputs
+        function clearForm() {
+            const form = document.getElementById('createUpdateForm');
+            form.querySelector('input[name="id"]').value = '';
+            form.querySelector('input[name="name"]').value = '';
+            form.querySelector('input[name="email"]').value = '';
+            form.querySelector('input[name="phone"]').value = '';
+            form.querySelector('input[name="country"]').value = '';
+            form.querySelector('input[name="category"]').value = '';
+        }
+
+        // Populate the form with data from a supplier
+        function populateFormWithSupplier(supplier) {
+            const form = document.getElementById('createUpdateForm');
+            form.querySelector('input[name="id"]').value = supplier.id;
+            form.querySelector('input[name="name"]').value = supplier.name;
+            form.querySelector('input[name="email"]').value = supplier.email;
+            form.querySelector('input[name="phone"]').value = supplier.phone;
+            form.querySelector('input[name="country"]').value = supplier.country;
+            form.querySelector('input[name="category"]').value = supplier.category;
+        }
+
+        // Get supplier data from the form
+        function getSupplierFromForm() {
+            const form = document.getElementById('createUpdateForm');
+            return {
+                id: form.querySelector('input[name="id"]').value,
+                name: form.querySelector('input[name="name"]').value,
+                email: form.querySelector('input[name="email"]').value,
+                phone: form.querySelector('input[name="phone"]').value,
+                country: form.querySelector('input[name="country"]').value,
+                category: form.querySelector('input[name="category"]').value
+            };
+        }
+
+        // Get supplier data from a table row
+        function getSupplierFromRow(row) {
+            return {
+                id: row.getAttribute("data-id"),
+                name: row.cells[1].textContent,
+                email: row.cells[2].textContent,
+                phone: row.cells[3].textContent,
+                country: row.cells[4].textContent,
+                category: row.cells[5].textContent
+            };
+        }
+
+        // Initialize the table with stored suppliers on page load
+        window.onload = function() {
+            refreshTable();
+        };
+    </script>
+
+</body>
+</html>
