@@ -54,6 +54,14 @@ Follow the next steps to run the project locally.
 5)  In your browser, go to: http://127.0.0.1:5000/supplierinterface.html
 6)  You can now create. Once the first supplier is added, user will be able to update and delete.
 
+## Assistance
+
+The base code for this project is derived from Andrew Beatty's WSAA Course Material 2024.
+ChatGPT was used to enhance the style and design of the supplierinterface.html file. to get the enhancement I copy the base code and ask chatGPT to improve the style with a student level.
+
+## Issues
+
+The first part of the project (web server + mock DAO) was developed on my laptop. However, I encountered issues connecting to WAMPServer and MySQL, which prevented the project from functioning correctly. As a result, I switched to using the remote system provided by the university, where the connection worked as expected. Once the project was completed, I copied the files back to my laptop and uploaded them to GitHub.
 
 ## Getting Help
 For any issue with this repository, please use the issues section of the repository. To create a new issue, follow these steps:
