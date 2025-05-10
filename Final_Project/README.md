@@ -48,10 +48,11 @@ Follow the next steps to run the project locally.
 2)  Connect to SQL database and create table.
     - Ensure your SQL database server is running.
     - Update the database connection settings in dbconfig.py (host, user, password, database).
-    - Run the createtable.py script to create the necessary suppliers table.
+    - Run createdatabase.py to create the data base.
+    - Run the createtable.py script to create the sql table.
 5)  Launch the REST server(python restserversupplier.py). Use visual code terminal to navigate to the correct folder.
 5)  In your browser, go to: http://127.0.0.1:5000/supplierinterface.html
-6)  You can now create, update, or delete supplier entries using the web interface.
+6)  You can now create. Once the first supplier is added, user will be able to update and delete.
 
 
 ## Getting Help
