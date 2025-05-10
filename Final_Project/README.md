@@ -54,6 +54,8 @@ Follow the next steps to run the project locally.
 5)  In your browser, go to: http://127.0.0.1:5000/supplierinterface.html
 6)  You can now create. Once the first supplier is added, user will be able to update and delete.
 
+*** optional: Use the Mock DAO System for Testing Without a Real Database. In restserversupplier.py, change the import statement: rom supplierDAO import supplierDAO, from supplierDAOSkeleton import DAO as supplierDAO***
+
 ## Assistance
 
 The base code for this project is derived from Andrew Beatty's WSAA Course Material 2024.
